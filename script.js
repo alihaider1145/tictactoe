@@ -2,6 +2,7 @@ function Gameboard(){
     const board = [];
     const row = 3;
     const column = 3;
+    const UI = GameUI();
 
     for(let i = 0; i < row; i++){
         board[i] = [];
@@ -10,22 +11,28 @@ function Gameboard(){
         }
     }
 
+    const getBoardWithCellValues = () => 
+        board.map((row) =>
+            row.map((cell) => cell.getValue())); //returns the board with cell values
+
     const printBoard = () => {
-        // for(let i = 0; i < row; i++){
-        //     console.log("|" + board[i][0] + "|" + board[i][0] + "|");
-        //     console.log("-----");
-        // }
-        const UI = gameUI();
-
-        const boardWithCellValues = board.map((row) =>
-            row.map((cell) => cell.getValue())
-        );
-
         for(let i = 0; i < row;i++){
             for(let j = 0; j < column; j++){
                 let index = i * 3 + j;    
-                UI.gameCellBtn[index].textContent = boardWithCellValues[i][j];
+                UI.getCellBtn()[index].textContent = getBoardWithCellValues()[i][j];
             }
+        }
+    };
+
+    const printAnnouncement = (activePlayer, condition) => {
+        if (condition === 'turn'){
+            UI.getGameAnnouncement().textContent = activePlayer.name + "'s turn!";
+        }
+        else if(condition === 'draw'){
+            UI.getGameAnnouncement().textContent = "It's a draw!";
+        }
+        else if (condition === 'win'){
+            UI.getGameAnnouncement().textContent = activePlayer.name + " won!";
         }
     };
 
@@ -39,9 +46,7 @@ function Gameboard(){
         }
     };
 
-    const getBoard = () => board;
-
-    return { getBoard, printBoard, playerTurn };
+    return { getBoardWithCellValues, printBoard, playerTurn, printAnnouncement };
 }
 
 function Cell(){
@@ -56,20 +61,25 @@ function Cell(){
     return { addTurn, getValue };
 }
 
-function gameUI(){
-    let gameCellBtn = [];
+function GameUI(){
+    let cellBtn = [];
 
-    gameCellBtn = document.getElementsByClassName("game-cell");
+    const gameAnnouncement = document.querySelector(".game-announcement");
+    cellBtn = document.getElementsByClassName("game-cell");
 
-    return { gameCellBtn };
+    const getCellBtn = () => cellBtn;
+
+    const getGameAnnouncement = () => gameAnnouncement;
+
+    return { getCellBtn, getGameAnnouncement};
 }
 
-function GameController(
+(function GameController(
     playerOneName = "Player One",
     playerTwoName = "Player Two"
 ){
     const board = Gameboard();
-    const UI = gameUI();
+    const UI = GameUI();
 
     const players = [
         {
@@ -84,43 +94,106 @@ function GameController(
 
     let activePlayer = players[0];
 
+    const checkWinner = () => {
+        for(let i = 0;i < 3;i++){
+            if(
+                (board.getBoardWithCellValues()[i][i] != '') 
+                && 
+                (
+                    (board.getBoardWithCellValues()[i][1] === board.getBoardWithCellValues()[i][2])
+                    &&
+                    (board.getBoardWithCellValues()[i][2] === board.getBoardWithCellValues()[i][0])
+                    &&
+                    (board.getBoardWithCellValues()[i][1] === board.getBoardWithCellValues()[i][0])
+                )
+            ){
+                board.printAnnouncement(activePlayer, 'win');
+                return true;
+            }
+            else if( 
+                (board.getBoardWithCellValues()[i][i] != '')  
+                && 
+                (
+                    (board.getBoardWithCellValues()[1][i] === board.getBoardWithCellValues()[0][i])
+                    &&
+                    (board.getBoardWithCellValues()[2][i] === board.getBoardWithCellValues()[1][i])
+                    &&
+                    (board.getBoardWithCellValues()[2][i] === board.getBoardWithCellValues()[0][i])
+                )
+            ){
+                board.printAnnouncement(activePlayer, 'win');
+                return true;
+            }
+        }
+        if(
+            (
+                (board.getBoardWithCellValues()[0][0] === board.getBoardWithCellValues()[2][2])
+                &&
+                (board.getBoardWithCellValues()[0][0] === board.getBoardWithCellValues()[1][1])
+                &&
+                (board.getBoardWithCellValues()[1][1] === board.getBoardWithCellValues()[2][2])
+                &&
+                (board.getBoardWithCellValues()[1][1] != '')
+            )
+            || 
+            (
+                (board.getBoardWithCellValues()[2][0] === board.getBoardWithCellValues()[1][1])
+                &&
+                (board.getBoardWithCellValues()[2][0] === board.getBoardWithCellValues()[0][2])
+                &&
+                (board.getBoardWithCellValues()[0][2] === board.getBoardWithCellValues()[1][1])
+                &&
+                (board.getBoardWithCellValues()[1][1] != '')
+            )
+        ){
+            board.printAnnouncement(activePlayer, 'win');
+            return true;
+        }
+    };
+
+    const checkDraw = () => {
+        if(board.getBoardWithCellValues().every(row => 
+            row.every(cell => (cell != ''))
+        )){ 
+            board.printAnnouncement(activePlayer, 'draw');
+            return;
+        }
+    };
+
     const switchPlayerTurn = () => {
         activePlayer = activePlayer === players[0] ? players[1] : players[0];
     };
 
-    const printNewRound = () => {
-        console.log(activePlayer.name + "'s Turn!");
-        board.printBoard();
-    };
-
-    const getActivePlayer = () => activePlayer;
-
     const playRound = (row, column) => {
         let success = board.playerTurn(row, column, activePlayer);
-        if (success){
+
+        if((checkDraw()) || (checkWinner())){
+            board.printBoard();
+            return;
+        }
+        else if (success){
             switchPlayerTurn();
+            board.printAnnouncement(activePlayer, 'turn');
+            board.printBoard();
         }
         else{
-            console.log("The place is already taken!");
+            UI.getGameAnnouncement().textContent = "The place is already taken, try again!";
         }
-        printNewRound();
     };
 
-    const bindEvents = () => {
+    const bindPlayRoundEvents = () => {
         for(let row = 0;row < 3; row++){
             for(let column = 0;column < 3; column++){
                 const index = row * 3 + column;
-                UI.gameCellBtn[index].addEventListener('click', (event) => {
+                UI.getCellBtn()[index].addEventListener('click', (event) => {
                     playRound(row, column);
                 });
             }
         }
     };
 
-    bindEvents();
-    printNewRound();
+    board.printAnnouncement(activePlayer, 'turn');
+    bindPlayRoundEvents();
 
-    return { playRound, getActivePlayer };
-}
-
-const game = new GameController();
+    return;
+})();

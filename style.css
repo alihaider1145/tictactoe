@@ -12,9 +12,16 @@
     width: 50vw;
     height: 50vh;
     margin: auto;
+    box-shadow: 2px 2px 5px 2px #111;
 }
 
 .game-cell{
     background-color: #F1E9D2;
     border: 0;
+    font-size: 4rem;
+}
+
+.game-announcement{
+    text-align: center;
+    font-size: 3rem;
 }
