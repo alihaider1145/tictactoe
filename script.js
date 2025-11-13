@@ -64,30 +64,46 @@ function Cell(){
 function GameUI(){
     let cellBtn = [];
 
+    cellBtn = document.querySelectorAll(".game-cell");
     const gameAnnouncement = document.querySelector(".game-announcement");
-    cellBtn = document.getElementsByClassName("game-cell");
+    const form = document.querySelector(".form");
+    const playAgainBtn = document.querySelector(".play-again-btn");
+    const gameContainer = document.querySelector(".game-container");
+    const formBtn = document.querySelector(".form-btn");
 
+    const getPlayerOneNameInput = () => new FormData(form).get("player-one-name");
+    const getPlayerTwoNameInput = () => new FormData(form).get("player-two-name");
+    const getForm = () => form;
+    const getGameContainer = () => gameContainer;
+    const getPlayAgainBtn = () => playAgainBtn;
     const getCellBtn = () => cellBtn;
-
     const getGameAnnouncement = () => gameAnnouncement;
+    const getFormBtn = () => formBtn;
 
-    return { getCellBtn, getGameAnnouncement};
+    return {   
+        getCellBtn,
+        getGameAnnouncement,
+        getPlayerOneNameInput,
+        getPlayerTwoNameInput,
+        getForm,
+        getGameContainer,
+        getPlayAgainBtn,
+        getFormBtn
+    };
 }
 
-(function GameController(
-    playerOneName = "Player One",
-    playerTwoName = "Player Two"
-){
+(function GameController(){
     const board = Gameboard();
     const UI = GameUI();
+    let playerOneName, playerTwoName;
 
     const players = [
         {
-            name: playerOneName,
+            name: '',
             token: 'X',
         },
         {
-            name: playerTwoName,
+            name: '',
             token: 'O',
         }
     ];
@@ -156,7 +172,6 @@ function GameUI(){
             row.every(cell => (cell != ''))
         )){ 
             board.printAnnouncement(activePlayer, 'draw');
-            return;
         }
     };
 
@@ -167,18 +182,45 @@ function GameUI(){
     const playRound = (row, column) => {
         let success = board.playerTurn(row, column, activePlayer);
 
+        board.printAnnouncement(activePlayer, 'turn');
+
         if((checkDraw()) || (checkWinner())){
             board.printBoard();
-            return;
+            gameOver();
         }
         else if (success){
             switchPlayerTurn();
-            board.printAnnouncement(activePlayer, 'turn');
             board.printBoard();
         }
         else{
             UI.getGameAnnouncement().textContent = "The place is already taken, try again!";
         }
+    };
+
+    const bindFormEvents = () => {
+        UI.getForm().addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            players[0].name = playerOneName = UI.getPlayerOneNameInput();
+            players[1].name = playerTwoName = UI.getPlayerTwoNameInput();
+
+            UI.getForm().classList.add("hidden");
+            UI.getGameContainer().classList.remove("hidden");
+
+            return { playerOneName, playerTwoName };
+        });
+    };
+
+    const bindPlayAgainEvents = () => {
+        UI.getPlayAgainBtn().addEventListener("click", (e) => {
+            UI.getPlayAgainBtn().classList.add("hidden");
+            UI.getGameContainer().classList.add("hidden");
+            UI.getForm().classList.remove("hidden");
+        });
+    };
+
+    const gameOver = () =>{
+        UI.getPlayAgainBtn().classList.remove("hidden");
     };
 
     const bindPlayRoundEvents = () => {
@@ -192,8 +234,9 @@ function GameUI(){
         }
     };
 
-    board.printAnnouncement(activePlayer, 'turn');
     bindPlayRoundEvents();
+    bindFormEvents();
+    bindPlayAgainEvents();
 
     return;
 })();

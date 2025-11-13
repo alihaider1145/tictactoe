@@ -3,6 +3,11 @@
     margin: 0;
 }
 
+body{
+    text-align: center;
+    font-size: 1rem;
+}
+
 .game-container{
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -24,4 +29,21 @@
 .game-announcement{
     text-align: center;
     font-size: 3rem;
+}
+
+.button{
+    padding: 8px 16px;
+    background-color: #1E90FF;
+    color: #FFFFFF;
+    border: 0;
+    border-radius: 8px;
+    margin: 8px;
+}
+
+.player-name{
+    margin: 8px;
+}
+
+.hidden{
+    display: none;
 }
