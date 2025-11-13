@@ -15,10 +15,18 @@ function Gameboard(){
         //     console.log("|" + board[i][0] + "|" + board[i][0] + "|");
         //     console.log("-----");
         // }
+        const UI = gameUI();
+
         const boardWithCellValues = board.map((row) =>
             row.map((cell) => cell.getValue())
         );
-        console.log(boardWithCellValues);
+
+        for(let i = 0; i < row;i++){
+            for(let j = 0; j < column; j++){
+                let index = i * 3 + j;    
+                UI.gameCellBtn[index].textContent = boardWithCellValues[i][j];
+            }
+        }
     };
 
     const playerTurn = (row, column, player) => {
@@ -48,11 +56,20 @@ function Cell(){
     return { addTurn, getValue };
 }
 
+function gameUI(){
+    let gameCellBtn = [];
+
+    gameCellBtn = document.getElementsByClassName("game-cell");
+
+    return { gameCellBtn };
+}
+
 function GameController(
     playerOneName = "Player One",
     playerTwoName = "Player Two"
 ){
     const board = Gameboard();
+    const UI = gameUI();
 
     const players = [
         {
@@ -89,8 +106,19 @@ function GameController(
         printNewRound();
     };
 
+    const bindEvents = () => {
+        for(let row = 0;row < 3; row++){
+            for(let column = 0;column < 3; column++){
+                const index = row * 3 + column;
+                UI.gameCellBtn[index].addEventListener('click', (event) => {
+                    playRound(row, column);
+                });
+            }
+        }
+    };
+
+    bindEvents();
     printNewRound();
-    console.log(window.innerHeight * 0.5);
 
     return { playRound, getActivePlayer };
 }
