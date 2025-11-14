@@ -34,6 +34,9 @@ function Gameboard(){
         else if (condition === 'win'){
             UI.getGameAnnouncement().textContent = activePlayer.name + " won!";
         }
+        else if(condition === 'initial'){
+            UI.getGameAnnouncement().textContent = "Welcome to Tic Tac Toe!";
+        }
     };
 
     const playerTurn = (row, column, player) => {
@@ -46,7 +49,14 @@ function Gameboard(){
         }
     };
 
-    return { getBoardWithCellValues, printBoard, playerTurn, printAnnouncement };
+    const cleanBoard = () => {
+        board.map((row) =>{
+            row.map((cell) => {cell.setValue('')})
+        });
+        printBoard();
+    };
+
+    return { getBoardWithCellValues, printBoard, playerTurn, printAnnouncement, cleanBoard };
 }
 
 function Cell(){
@@ -58,7 +68,11 @@ function Cell(){
 
     const getValue = () => value;
 
-    return { addTurn, getValue };
+    const setValue = (newValue) => {
+        value = newValue;
+    };
+
+    return { addTurn, getValue, setValue };
 }
 
 function GameUI(){
@@ -182,8 +196,6 @@ function GameUI(){
     const playRound = (row, column) => {
         let success = board.playerTurn(row, column, activePlayer);
 
-        board.printAnnouncement(activePlayer, 'turn');
-
         if((checkDraw()) || (checkWinner())){
             board.printBoard();
             gameOver();
@@ -191,6 +203,7 @@ function GameUI(){
         else if (success){
             switchPlayerTurn();
             board.printBoard();
+            board.printAnnouncement(activePlayer, 'turn');
         }
         else{
             UI.getGameAnnouncement().textContent = "The place is already taken, try again!";
@@ -207,7 +220,7 @@ function GameUI(){
             UI.getForm().classList.add("hidden");
             UI.getGameContainer().classList.remove("hidden");
 
-            return { playerOneName, playerTwoName };
+            board.printAnnouncement(activePlayer, "turn");
         });
     };
 
@@ -216,6 +229,9 @@ function GameUI(){
             UI.getPlayAgainBtn().classList.add("hidden");
             UI.getGameContainer().classList.add("hidden");
             UI.getForm().classList.remove("hidden");
+
+            board.cleanBoard();
+            board.printAnnouncement(undefined, 'initial');
         });
     };
 
