@@ -1,1 +1,3 @@
-# tictactoe
+This project was more js based so I did not focus on CSS as I usually do.
+I learnt about different JS patterns. I particularly coded this project with factory functions and IIFEs. I learnt that every instruction or line of code should be broken down into tasks (methods) or variables (value storage). Then those tasks and variables should be placed into logical modules. A module would then be a logical group of instructions. I also learnt how to access variables and methods from different modules.
+Moreover, I also had three screens: initial, game, play again. In this project, I learnt how to integrate these screens sequentially. The way I did this is by adding a 'hidden' class after either the game finishes or a button is pressed. Then I applied display none on the hidden class. Likewise, I removed the 'hidden' class to reveal the module.
