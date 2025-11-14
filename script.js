@@ -186,6 +186,7 @@ function GameUI(){
             row.every(cell => (cell != ''))
         )){ 
             board.printAnnouncement(activePlayer, 'draw');
+            return true;
         }
     };
 
